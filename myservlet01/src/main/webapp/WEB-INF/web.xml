@@ -1,0 +1,18 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<!-- 为MyServlet配置的xml文件-->
+<web-app>
+  <display-name>Archetype Created Web Application</display-name>
+
+  <servlet>
+    <servlet-name>myServlet</servlet-name>
+    <servlet-class>com.ray.servlet.myservlet.MyServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>myServlet</servlet-name>
+    <url-pattern>/helloWorld.do</url-pattern>
+  </servlet-mapping>
+</web-app>
