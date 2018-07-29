@@ -1,20 +1,71 @@
+- [项目记录](#项目记录)
+- [HTTP协议相关](#HTTP协议相关)
+    - [HTTP协议的特征](#HTTP协议的特征)
+    - [请求类型](#请求类型)
+        - [GET和POST的区别](#GET和POST的区别)
+    - [HTTP数据包](#HTTP数据包)
+        - [GET方式提交（Java代码控制台打印为例）](#GET方式提交（Java代码控制台打印为例）)
+- [Servlet继承结构](#Servlet继承结构)
+- [Servlet的生命周期](#Servlet的生命周期)
+    - [Tomcat执行Servlet过程(伪代码)](#Tomcat执行Servlet过程(伪代码))
+- [Servlet的作用](#Servlet的作用)
+    - [Servlet如何获取表单数据](#Servlet如何获取表单数据)
+    - [解决Servlet中的中文乱码问题](#解决Servlet中的中文乱码问题)
+    - [关于Servlet的线程安全的问题](#关于Servlet的线程安全的问题)
+    - [Servlet文件上传](#Servlet文件上传)
+    - [自启动的Servlet](#自启动的Servlet)
+    - [Servlet的常见对象](#Servlet的常见对象)
+        - [ServletContext](#ServletContext)
+            - [ServletContext的主要用法](#ServletContext的主要用法)
+        - [ServletConfig](#ServletConfig)
+        - [Cookie](#Cookie)
+            - [什么是Cookie](#什么是Cookie)
+            - [Cookie中如何传递中文信息](#Cookie中如何传递中文信息)
+        - [HttpSession](#HttpSession)
+            - [什么是HttpSession](#什么是HttpSession)
+            - [HttpSession的运行过程](#HttpSession的运行过程)
+            - [HttpSession的生命周期](#HttpSession的生命周期)
+- [编写一个自定义Servlet](#编写一个自定义Servlet)
+    - [自定义Servlet类继承HttPServlet,并且重写doGet和doPost方法](#自定义Servlet类继承HttPServlet,并且重写doGet和doPost方法)
+    - [编写到运行Servlet的步骤（不适用IDE的方法）](#编写到运行Servlet的步骤（不适用IDE的方法）)
+    
+## 项目记录
++ myServlet01: 实现简单的Servlet的Hello World
++ myServlet02: 实现三种乱码处理方案
++ myServlet03: 实现通过Servlet的API获取用户浏览器的基本信息
++ myServlet04: 实现通过IO流向客户端传输图片并展示
++ myServlet05: 实现文件下载
++ myServlet06: 实现通过JDBC对数据库进行操作,待施工
+
+本笔记为个人学习思考解惑记录,多方面引用互联网资料。
+若有纰漏,欢迎指正。
+
 ## HTTP协议相关
 ### HTTP协议的特征
+
 1. 单向性：客户端和服务端建立连接依靠于客户端发送请求，如果客户端不发送请求，服务端不会主动发送主句到客户端
 2. 无状态：HTTP对于事务处理没有记忆能力。无法“断点续传”
 3. 灵活：HTTP允许传输任意类型的数据对象。正在传输的类型有Content-Type加以标记
 4. 简单快速：客户端向服务器发送请求时，只需传送请求方法和路径。请求方法常用的有GET,POST,HEAD,PUT,DELETE。每种方法规定了客户端与服务器建立连接的类型不同。由于HTTP协议简单，使得HTTP服务器的程序规模小，因而通信速度快
 
+------------
+
+
 ### 请求类型
 #### GET和POST的区别
+
 1. GET方式提交表单时，表单数据会在地址栏显示。而POST不会
 2. GET方式提交表单时，表单数据长度是有限的（地址栏长度有限）。而POST理论上没有限制
 3. GET方式提交表单时，表单数据都是以字符方式提交。而POST既可以用字符也可以用字节，默认用字符。
 4. GET方式提交表单会在Http数据包中的第一行出现，而POST提交表单会在空一行的body中出现
 5. GET请求能够被缓存，POST请求不能被缓存下来
 
+------------
+
+
 ### HTTP数据包
 #### GET方式提交（Java代码控制台打印为例）
+
 ```java
 public class App {
     public static void main(String[] args) {
@@ -34,7 +85,7 @@ public class App {
 ```
 运行以上代码后，在浏览器输入localhost:8080  
 则在控制台打印以下内容
-```nohighlight
+```text
           GET / HTTP/1.1
           Host: localhost:8080
           Connection: keep-alive
@@ -45,25 +96,33 @@ public class App {
           Accept-Language: zh-CN,zh;q=0.9
           Cookie: Idea-7798877d=aa86ef31-e4df-4cc6-bf8d-66407314771c
 ```
+
+------------
+
+
 ## Servlet继承结构
-```mermaid
-graph TB
-    A(Servlet接口)-->B(GenericServlet抽象类<br>作用:解除Servlet和HTTP协议的耦合) 
-    B-->C(HtppServlet抽象类<br>作用:基于Servlet对Http协议的封装)
-    C-->D(自定义Servlet)
-```
+
+![image](https://www.crzmy.com/wp-content/uploads/2018/07/Servlet.png) 
+
+------------
+
+
 ## Servlet的生命周期
-#### Servlet接口中定义了作为一个Servlet在整个生命周期中应该拥有三个阶段
+
+Servlet接口中定义了作为一个Servlet在整个生命周期中应该拥有三个阶段
 1. 初始化
 2. 服务 service
 3. 销毁 destroy 
 
 ```text
-Servlet的生命周期是由容器管理的  
-Servlet初始化以后立即调用init()方法，开发者可以重写该方法让Servlet初始化以后执行相应的操作
+Servlet的生命周期是由容器管理的,Servlet初始化以后立即调用init()方法，开发者可以重写该方法让Servlet初始化以后执行相应的操作
 ```
 
+------------
+
+
 ### Tomcat执行Servlet过程(伪代码)
+
 当客户端请求Servlet的时,Tomcat获取HTTP数据包信息,得到了头部信息中的
 ```text
 GET /myservlet/hello.do HTTP/1.1
@@ -107,9 +166,9 @@ while((line = br.readLine()) != null){
     request.setMethod(arr[0]);
     // 例如获取表单数据
     ...
-    
+
     // Tomcat解析客户端的相关信息,比如发送请求的客户端的IP地址
-    reponse.setSocket(s);
+    response.setSocket(s);
 }
 
 // 对请求的HTTP数据包解析完毕后,处理请求
@@ -134,12 +193,12 @@ new Thread(new St(request, response)).start();
 // 这就是destroy()方法做的类似事情
 ```
 模拟Tomcat里多线程
-```
+```java
 public St implements Runnable{
     private Servlet obj;
     private HttpServletRequest request;
     private HttpServletResponse response;
-    
+
     public St(Servlet obj, HttpServletRequest request, HttpServletResponse response){
         this.obj = obj;
         this.request = request;
@@ -158,79 +217,107 @@ public St implements Runnable{
     }
 }
 ```
-##### 总结:
+> 总结:
 
 Servlet的生命周期是由容器管理的,分为init,service和destroy三个阶段.  
 当有客户端第一次访问这个Servlet时,容器会立即初始化这个Servlet对象,初始化结束以后立即调用init()方法,并且在新的线程中调用service()方法.  
 容器会将初始化后的Servlet对象进行缓存,当有客户端再次请求该Servlet时,容器不会再进行创建,而是直接在新的线程里调用service()方法.  
 当容器关闭时,容器会在销毁这个Servlet对象之前,调用一次destroy()方法.
 
+------------
+
+
 ## Servlet的作用
+
 1. 获取表单数据
 2. 获取浏览器的附加信息
 3. 处理数据(本身不具备处理数据的能力,比如持久化.它是通过调用其他的处理数据的方式来实现的,比如JDBC...)
 4. 给客户端产生一个响应
 5. 在响应中添加附加信息
 
+------------
+
+
 ### Servlet如何获取表单数据
+
 在HttpServletRequest里有几个方法.
-1. String getParameter(String name)
-    + 这个方法处理键值对比如key=value,通过key来获取对应的value.但是这个方法不能获取页面上checkbox的value,因为他的数据格式是key=value1&key=value2&key=value3
-2. String[] getParameterValues(String name)
-    + 该方法就可以处理checkbox的value,它可以获取对应key的所有value
-3. String getQueryingString(String str)
-    + 这个方法可以获取URL中的查询字符串(?后面的字符串)
-4. Map getParameterMap()
-    + 这个方法可以获取请求参数将其封装成Map数据格式
-### 解决Servlet中的中文乱码问题
-首先要知道的是Tomcat的默认字符集是ISO-8859-1
-
-1. 通用,通过jdk的new String产生新的对应编码的String对象
 ```java
-        /*解决中文乱码问题 第一种方式
-          GET和POST都有效,但不推荐,会有大量冗余代码*/
+1. String getParameter(String name)
+	这个方法处理键值对比如key=value,通过key来获取对应的value.但是这个方法不能获取页面上checkbox的value,因为他的数据格式是key=value1&key=value2&key=value3
+2. String[] getParameterValues(String name)
+	该方法就可以处理checkbox的value,它可以获取对应key的所有value
+3. String getQueryingString(String str)
+	这个方法可以获取URL中的查询字符串(?后面的字符串)
+4. Map getParameterMap()
+	这个方法可以获取请求参数将其封装成Map数据格式
+```
 
-        String name = request.getParameter("name");
-        // 乱码
-        System.out.println(name);
-        name = new String(name.getBytes("iso-8859-1"),"utf-8");
-        // 正常
-        System.out.println(name);
+------------
+
+
+### 解决Servlet中的中文乱码问题
+
+首先要知道的是Tomcat的默认字符集是ISO-8859-1
+1. 通用,通过jdk的new String产生新的对应编码的String对象
+
+```java
+/*解决中文乱码问题 第一种方式
+GET和POST都有效,但不推荐,会有大量冗余代码*/
+
+String name = request.getParameter("name");
+// 乱码
+System.out.println(name);
+name = new String(name.getBytes("iso-8859-1"),"utf-8");
+// 正常
+System.out.println(name);
 ```
 2. 只适用POST,通过HttpServletRequest的API
-```java
-        /*解决中文乱码问题 第二种方式
-         只适用于POST请求,使用request里的内置方法*/
 
-        request.setCharacterEncoding("utf-8");
-        String name = request.getParameter("name");
-        // 正常
-        System.out.println(name);
+```java
+/*解决中文乱码问题 第二种方式
+只适用于POST请求,使用request里的内置方法*/
+
+request.setCharacterEncoding("utf-8");
+String name = request.getParameter("name");
+// 正常
+System.out.println(name);
 ```
 3. 通用,修改Tomcat配置文件server.xml
+
 ```xml
-    <Connector port="8080" protocol="HTTP/1.1"
-               connectionTimeout="20000"
-               redirectPort="8443"
-               URIEncoding="utf-8" />
+<Connector port="8080" protocol="HTTP/1.1"
+           connectionTimeout="20000"
+           redirectPort="8443"
+           URIEncoding="utf-8" />
 ```
 ```java
-        /*解决中文乱码问题 第三种方式
-         * 修改Tomcat配置文件server.xml
-         * 在Connector节点添加URIEncoding="utf-8"
-         * */
-        String value = request.getParameter("name");
-        // 正常
-        System.out.println(value);
+/*解决中文乱码问题 第三种方式
+* 修改Tomcat配置文件server.xml
+ * 在Connector节点添加URIEncoding="utf-8"
+ * */
+String value = request.getParameter("name");
+// 正常
+System.out.println(value);
 ```
+
+------------
+
+
 ### 关于Servlet的线程安全的问题
-Servlet是一个线程不安全的技术,在Servlet中定义成员变量时,如果一定要定义成员变量,那么以读取为主.尽量不要同时读同时写.如果一定有这样的需求,则需要加锁.  
+
+Servlet是一个线程不安全的技术,在Servlet中定义成员变量时,如果一定要定义成员变量,那么以读取为主.尽量不要同时读同时写.如果一定有这样的需求,则需要加锁.
 ~~interface SingeThreadModel~~ 是Servlet提供的一个标识接口,该接口标识实现了该接口的Servlet的运行方式会由并行化改为串行化.效率低下,所以该接口在解决线程安全的问题时,已经不推荐使用了.
 
+------------
+
 ### Servlet文件上传
+
 1. 在实现文件上传是,表单的提交方式必须是POST方式提交,因为POST请求才支持让表单数据以字节的方式提交,而GET只能是字符提交.
 2. 在form表单中修改请求的信息,将原来默认的字符提交修改为字节提交:通过修改form标签中的enctype属性,将其值改为multipart/form-data,该属性表示当前表单为字节格式,当服务器接收到当前数据包的时候,则不会去解析,所以也无法使用request.getParameter()去获取表单数据.
 3. 在2的情况下,如果需要处理表单中的内容,需要通过request对象的getInputStream()方法来获取一个通信流,通过对流对象的操作完成相应的表单处理.但是相比更推荐使用Apache的common-fileupload组件.
+
+------------
+
 
 ### 自启动的Servlet
 自启动的Servlet的实例化不依赖于客户端请求,而是依赖于容器.当容器启动时就回去初始化这个Servlet.
@@ -239,6 +326,9 @@ Servlet是一个线程不安全的技术,在Servlet中定义成员变量时,如�
 <load-on-startup>1</load-on-startup>
 ```
 其中数字表示启动优先级,数字越小,优先级越高
+
+------------
+
 ### Servlet的常见对象
 #### ServletContext
 ##### ServletContext的主要用法
@@ -284,6 +374,7 @@ String value = sc.getInitParameter("key");
 该配置信息是全局可访问,可以配置多个<context-param>,但是在一个<context-param>里只能有一个key/value配置.
 #### ServletConfig
 作用:用于读取在web.xml的<servlet>节点中的配置信息.在<servlet>节点中可以加入<init-param>节点.
+	
 ```xml
 <servlet>
     <servlet-name>MyServlet</servlet-name>
@@ -345,6 +436,7 @@ protected void doGet(HttpServletRequest request, HttpServletResponse response) t
         this.doPost(request, response);
 }
 ```
+
 ##### Cookie中如何传递中文信息
 1. 通过可逆的加密算法
 ```java
@@ -405,11 +497,17 @@ if(cookies == null || cookies.length<=0){
     }
 }
 ```
+
+------------
+
+
 #### HttpSession
 ##### 什么是HttpSession
 HttpSession对象可以建立客户端与服务器之间的对话,但会话是否建立.取决于服务器是否为这个客户端创建了HttpSession对象.如果是,则HttpSession就表示当前客户端与服务器的会话已经建立.进而该HttpSession对象只为该客户端使用,不会与其他客户端共享.
+
 ##### HttpSession的运行过程
 首先HttpServletRequest中有两个获取HttpSession的方法,源码如下,删除了部的注释
+
 ```java
 /**
  *
@@ -444,7 +542,12 @@ public HttpSession getSession();
 ```
 阅读了上面的代码可以知道,getSession()和getSession(true)是同一个执行结果.  
 当客户端浏览器访问Servlet时,如果代码中调用了getSession(boolean create)或者getSession(),那么服务器会根据传递的参数来执行不同的逻辑.如果create参数是true或者没有参数则会在底层的SessionId/HttpSession对象映射中寻找是否有该客户端的HttpSession对象,如果没有则创建一个新的HttpSession对象并且把该对象的SessionId通过状态Cookie返回给客户端.如果create参数是false,同样也会在底层的SessionId/HttpSession对象映射中寻找是否有该客户端的HttpSession对象,但是如果没有对应的HttpSession对象,则会返回null.
+
+------------
+
+
 ##### HttpSession的生命周期
+
 1. 创建: 当有客户端浏览器第一次请求Servlet时,该Servlet中调用了HttpServletRequest里的getSession(boolean create)或者request.getSession()方法时,则会创建一个HttpSession对象.
 2. 销毁:
     1. 使用HttpSession里的invalidate()方法,该方法会直接是该Session直接销毁,并且取消绑定的任何对象.
@@ -473,8 +576,14 @@ public HttpSession getSession();
         <session-timeout>1</session-timeout>
     </session-config>
     ```
+
+------------
+
+
 ## 编写一个自定义Servlet
+
 ### 自定义Servlet类继承HttPServlet,并且重写doGet和doPost方法
+
 ```java
 public class MyServlet extends HttpServlet {
 
@@ -500,6 +609,7 @@ public class MyServlet extends HttpServlet {
 
 ```
 ### 编写到运行Servlet的步骤（不适用IDE的方法）
+
 1. 编写自定义Servlet类继承HttpServlet
 2. 重写doGet和doPost方法
 3. 使用javac工具编译代码
@@ -508,14 +618,14 @@ public class MyServlet extends HttpServlet {
 6. 在WEB-INF目录下创建web.xml
 7. 编辑web.xml,配置Servlet
 ```xml
-	<web-app>
+<web-app>
 		<display-name>ArchetypeCreatedWebApplication</display-name>
-		
+
 		<servlet>
 			<servlet-name>myServlet</servlet-name>
 			<servlet-class>com.ray.servlet.myservlet.MyServlet</servlet-class>
 		</servlet>
-		
+
 		<servlet-mapping>
 			<servlet-name>myServlet</servlet-name>
 			<url-pattern>*.do</url-pattern>
@@ -524,10 +634,9 @@ public class MyServlet extends HttpServlet {
 ```
 8. 启动Tomcat容器
 9. 在浏览器地址栏输入
-```
+```text
 localhost:8080/(servlet名字)/(请求路径)
 本例为：localhost:8080/myServlet/hello.do
 ```
 10. 结果展示  
 ![image](https://note.youdao.com/yws/api/personal/file/WEB087b923b25abb635430f047f7bebbd6b?method=download&shareKey=64398d4c6780b770074e3f9d3fab43f7) 
-
