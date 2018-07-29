@@ -46,7 +46,7 @@ public class App {
           Cookie: Idea-7798877d=aa86ef31-e4df-4cc6-bf8d-66407314771c
 ```
 ## Servlet继承结构
-```
+```mermaid
 graph TB
     A(Servlet接口)-->B(GenericServlet抽象类<br>作用:解除Servlet和HTTP协议的耦合) 
     B-->C(HtppServlet抽象类<br>作用:基于Servlet对Http协议的封装)
