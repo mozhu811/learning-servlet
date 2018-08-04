@@ -358,6 +358,7 @@ Object getAttribute(String name);
 ```
 注意:
 建议不要存储业务数据,数据会随着生命周期一直在内存中,增大了服务器的负担.其次也避免了与数据库数据同步的问题.
+
 4. 读取web.xml里的配置信息
 ```xml
 <context-param>
