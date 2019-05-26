@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="exploded-war" name="myservlet06:war exploded">
-    <output-path>$PROJECT_DIR$/out/artifacts/myservlet06_war_exploded</output-path>
-    <root id="root">
-      <element id="javaee-facet-resources" facet="myservlet06/web/Web" />
-    </root>
-  </artifact>
-</component>
